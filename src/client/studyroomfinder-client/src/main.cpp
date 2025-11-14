@@ -1,9 +1,15 @@
 #include <Arduino.h>
 
+const int microphonePin = A0;
+
 void setup() {
-  // put your setup code here, to run once:
+  pinMode(microphonePin, INPUT);
+  Serial.begin(115200);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  Serial.print("volume level: ");
+  int val = analogRead(microphonePin);
+  Serial.println(val);
+  delay(100);
 }
