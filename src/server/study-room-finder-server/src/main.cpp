@@ -14,36 +14,51 @@
 #define PASSPHRASE ""
 #endif
 
-const char* ssid = SSID;
-const char* password = PASSPHRASE;
+const char *ssid = SSID;
+const char *password = PASSPHRASE;
 
 ESP8266WebServer server(80);
 
-void handleRoot() {
-  if (!LittleFS.begin()) {
-    server.send(500, "text/plain", "Failed to mount file system");
-    return;
-  }
-
-  File file = LittleFS.open("/dist/index.html", "r");
-
-  String html = file.readString();
-  file.close();
-  server.send(200, "text/html", html);
+// helper to pick a content-type by extension
+String getContentType(const String &path) {
+  if (path.endsWith(".html"))
+    return "text/html";
+  if (path.endsWith(".css"))
+    return "text/css";
+  if (path.endsWith(".js"))
+    return "application/javascript";
+  if (path.endsWith(".png"))
+    return "image/png";
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
+    return "image/jpeg";
+  if (path.endsWith(".svg"))
+    return "image/svg+xml";
+  if (path.endsWith(".json"))
+    return "application/json";
+  if (path.endsWith(".ico"))
+    return "image/x-icon";
+  return "application/octet-stream";
 }
 
 void handleNotFound() {
+  String uri = server.uri();
+
+  String fsPath = "/dist" + uri;
+  if (fsPath.endsWith("/"))
+    fsPath += "index.html";
+
+  if (LittleFS.exists(fsPath)) {
+    File f = LittleFS.open(fsPath, "r");
+    if (f) {
+      server.streamFile(f, getContentType(fsPath));
+      f.close();
+      return;
+    }
+  }
+
   String message = "File Not Found\n\n";
   message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
+  message += uri;
   server.send(404, "text/plain", message);
 }
 
@@ -70,8 +85,23 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/", handleRoot);
+  if (!LittleFS.begin()) {
+    Serial.println("Failed to mount LittleFS");
+  }
+
   server.serveStatic("/", LittleFS, "/dist");
+
+  server.on("/", HTTP_GET, []() {
+    if (LittleFS.exists("/dist/index.html")) {
+      File f = LittleFS.open("/dist/index.html", "r");
+      if (f) {
+        server.streamFile(f, "text/html");
+        f.close();
+        return;
+      }
+    }
+    server.send(500, "text/plain", "index.html not found");
+  });
 
   server.onNotFound(handleNotFound);
 
