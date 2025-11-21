@@ -1,10 +1,6 @@
 ---
 import '../styles/global.css';
-// Component Imports
-import Button from '../components/Button.astro';
-
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
+import LocationCard from '@/components/LocationInfo.astro'
 ---
 
 <html lang="en">
@@ -13,13 +9,21 @@ import Button from '../components/Button.astro';
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
+		<title>CDoOSSOC</title>
 	</head>
 
 	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
+		<h1 class="text-center text-4xl pt-12 pb-8 bg-red-400 text-white font-semibold">
+			Dashboard
+		</h1>
+		<div class="grid place-items-center gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full max-w-6xl mx-auto my-5 px-4">
+			<LocationCard roomName="CKB Study Lounge"/>
+			<LocationCard roomName="Campus Center Lobby"/>
+			<LocationCard roomName="Van Houten Floor 3"/>
+			<LocationCard roomName="Van Houten Floor 2"/>
+			<LocationCard roomName="Van Houten Floor 1"/>
+			<LocationCard roomName="Van Houten Basement"/>
+			<LocationCard roomName="Littman Library"/>
 		</div>
 	</body>
 </html>

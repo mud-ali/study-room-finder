@@ -1,0 +1,69 @@
+---
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Progress } from "@/components/ui/progress";
+
+let { roomName /*, occupancyAmount, volumePercent */ } = Astro.props;
+
+let occupancyAmount = Math.random() * 60 + 20;
+let volumePercent = Math.random() * 60 + 20;
+
+const getDescriptorFromPercent = (percent: number) => {
+    if (percent < 40) return "Low";
+    else if (percent < 70) return "Medium";
+    else return "High";
+};
+
+let occupancyDesc = getDescriptorFromPercent(occupancyAmount);
+let volumeDesc = getDescriptorFromPercent(volumePercent);
+---
+
+<Card className="w-full max-w-sm my-6">
+    <CardHeader>
+        <CardTitle>
+            {roomName}
+        </CardTitle>
+    </CardHeader>
+    <CardContent>
+        <div class="flex items-center justify-between">
+            <span>Occupancy: {occupancyDesc}</span>
+            <span>~{Math.round(occupancyAmount)}%</span>
+        </div>
+        <Progress
+            id={`occupancy-bar-${roomName}`}
+            value={occupancyAmount}
+            className={`w-full mt-3 mb-7`}
+        />
+        <div class="flex items-center justify-between">
+            <span>Volume: {volumeDesc}</span>
+            <span>~{Math.round(volumePercent)}%</span>
+        </div>
+        <Progress
+            id={`volume-bar-${roomName}`}
+            value={volumePercent}
+            className={`w-full mt-3 mb-7`}
+        />
+    </CardContent>
+</Card>
+
+<script define:vars={{ occupancyDesc, volumeDesc, roomName }}>
+    let occupancyBar = document.getElementById(`occupancy-bar-${roomName}`);
+    let volumeBar = document.getElementById(`volume-bar-${roomName}`);
+
+    function setProgressBarColors(descriptor, progressBar) {
+        switch (descriptor) {
+            case "Low":
+                progressBar.classList.add("[&>div]:bg-green-400");
+                break;
+            case "Medium":
+                progressBar.classList.add("[&>div]:bg-yellow-400");
+                break;
+            case "High":
+                progressBar.classList.add("[&>div]:bg-red-300");
+                break;
+        }
+    }
+
+    setProgressBarColors(occupancyDesc, occupancyBar);
+    setProgressBarColors(volumeDesc, volumeBar);
+</script>
