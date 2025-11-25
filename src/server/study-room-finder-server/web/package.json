@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && rm -rf ../data/dist && cp -r ./dist/ ../data/ && echo \"*\" > ../data/dist/.gitignore",
     "preview": "astro preview",
     "astro": "astro"
   },
