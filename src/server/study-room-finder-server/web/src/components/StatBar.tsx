@@ -43,9 +43,9 @@ export default function StatBar({ descriptorLabel, value, roomName }: StatBarPro
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" title={descriptor}>
                 <span>
-                    {descriptorLabel}: {descriptor}
+                    {descriptorLabel}:
                 </span>
                 <span>~{Math.round(value ?? 0)}%</span>
             </div>
