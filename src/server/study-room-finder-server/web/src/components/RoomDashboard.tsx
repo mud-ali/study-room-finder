@@ -5,21 +5,19 @@ import RoomCard from "@/components/RoomCard";
 import type { RoomData } from "@/components/RoomCard";
 
 interface RoomDashboardProps {
-    baseUrl: string;
+    serverPort: number;
     initialData?: RoomData[];
 }
 
-// refresh data every second
-// TODO: update this value
 const REFRESH_TIME = 1000; 
 
-export default function RoomDashboard({ baseUrl, initialData = [] }: RoomDashboardProps) {
+export default function RoomDashboard({ serverPort, initialData = [] }: RoomDashboardProps) {
     const [rooms, setRooms] = React.useState<RoomData[]>(initialData);
     const [error, setError] = React.useState<string | null>(null);
 
     const fetchRooms = React.useCallback(async () => {
         try {
-            const res = await fetch(`${baseUrl}/refresh`);
+            const res = await fetch(`http://${window.location.host.split(":")[0]}:${serverPort}/refresh`);
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
             const data = await res.json();
             setRooms(data);
@@ -28,7 +26,7 @@ export default function RoomDashboard({ baseUrl, initialData = [] }: RoomDashboa
             console.error("Error fetching room data:", err);
             setError("Failed to fetch room data");
         }
-    }, [baseUrl]);
+    }, [serverPort]);
 
     React.useEffect(() => {
         // get initial data and then re-request on a set interval
