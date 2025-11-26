@@ -1,11 +1,13 @@
 #include <Arduino.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
+#include <ArduinoJson.h>
+#include <ESPmDNS.h>
 #include <LittleFS.h>
+#include <WebServer.h>
+#include <WiFi.h>
 #include <WiFiClient.h>
 
 #include "config.h"
+#include "room_data.h"
 
 #ifndef SSID
 #define SSID ""
@@ -17,7 +19,7 @@
 const char *ssid = SSID;
 const char *password = PASSPHRASE;
 
-ESP8266WebServer server(80);
+WebServer server(80);
 
 // helper to pick a content-type by extension
 String getContentType(const String &path) {
@@ -65,12 +67,12 @@ void handleNotFound() {
 void setup(void) {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+
   int wifiConnected = WiFi.begin(ssid, password);
   if (wifiConnected == WL_CONNECT_FAILED) {
     Serial.println("failed to connect wifi");
   }
   Serial.println("");
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -89,8 +91,6 @@ void setup(void) {
     Serial.println("Failed to mount LittleFS");
   }
 
-  server.serveStatic("/", LittleFS, "/dist");
-
   server.on("/", HTTP_GET, []() {
     if (LittleFS.exists("/dist/index.html")) {
       File f = LittleFS.open("/dist/index.html", "r");
@@ -100,9 +100,76 @@ void setup(void) {
         return;
       }
     }
+    Serial.println("no files found");
     server.send(500, "text/plain", "index.html not found");
   });
 
+  server.on("/update", HTTP_POST, []() {
+    if (!server.hasArg("plain")) {
+      server.send(400, "application/json",
+                  "{\"error\":\"Please include a JSON body\"}");
+      return;
+    }
+
+    String body = server.arg("plain");
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, body);
+    if (err) {
+      server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+      return;
+    }
+
+    const char *name = doc["name"];
+    if (!name) {
+      server.send(400, "application/json", "{\"error\":\"Missing name\"}");
+      return;
+    }
+
+    bool roomExists = false;
+    for (int i = 0; i < allRooms.size(); i++) {
+      if (allRooms.at(i).name == name) {
+        if (doc["occupancy"].is<unsigned int>()) {
+          allRooms[i].occupancy = doc["occupancy"].as<unsigned int>();
+        }
+        if (doc["volume"].is<unsigned int>()) {
+          allRooms.at(i).volume = doc["volume"].as<unsigned int>();
+        }
+        roomExists = true;
+        break;
+      }
+    }
+
+    if (!roomExists) {
+        roomData newRoom = {
+            name,
+            doc["occupancy"].as<unsigned int>(),
+            doc["volume"].as<unsigned int>(),
+            100
+        };
+        allRooms.push_back(newRoom);
+    }
+
+    server.send(200, "application/json", "{\"error\":false}");
+  });
+
+  server.on("/refresh", HTTP_GET, []() {
+    JsonDocument doc;
+    JsonArray rooms = doc.to<JsonArray>();
+
+    for (int i = 0; i < allRooms.size(); i++) {
+      JsonObject room = rooms.add<JsonObject>();
+      room["name"] = allRooms.at(i).name;
+      room["occupancy"] = allRooms.at(i).occupancy;
+      room["volume"] = allRooms.at(i).volume;
+      room["maxOccupancy"] = allRooms.at(i).maxOccupancy;
+    }
+
+    String output;
+    serializeJson(doc, output);
+    server.send(200, "application/json", output);
+  });
+
+  server.serveStatic("/", LittleFS, "/dist/");
   server.onNotFound(handleNotFound);
 
   server.begin();
