@@ -1,29 +1,23 @@
 ---
-import '../styles/global.css';
-import LocationCard from '@/components/LocationInfo.astro'
+import "../styles/global.css";
+import RoomDashboard from "@/components/RoomDashboard";
+
+const BASE_URL = "http://localhost:8000"; //todo: update if port changes
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>CDoOSSOC</title>
-	</head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>CDoOSSOC</title>
+    </head>
 
-	<body>
-		<h1 class="text-center text-4xl pt-12 pb-8 bg-red-400 text-white font-semibold">
-			Dashboard
-		</h1>
-		<div class="auto-rows-fr grid place-items-center gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full max-w-6xl mx-auto my-5 px-4">
-			<LocationCard isLive={true} roomName="CKB Study Lounge"/>
-			<LocationCard roomName="Campus Center Lobby"/>
-			<LocationCard roomName="Van Houten Floor 3"/>
-			<LocationCard roomName="Van Houten Floor 2"/>
-			<LocationCard roomName="Van Houten Floor 1"/>
-			<LocationCard roomName="Van Houten Basement"/>
-			<LocationCard roomName="Littman Library"/>
-		</div>
-	</body>
+    <body>
+        <h1 class="text-center text-4xl pt-12 pb-8 bg-red-400 text-white font-semibold">
+            Dashboard
+        </h1>
+        <RoomDashboard client:load baseUrl={BASE_URL} />
+    </body>
 </html>
