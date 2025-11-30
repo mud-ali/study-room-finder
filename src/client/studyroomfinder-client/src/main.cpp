@@ -1,37 +1,31 @@
 #include <Arduino.h>
 
-const int micPin = A0;
-const int sampleMillis = 50;
+#include "occupancy.hpp"
+
+const int trigPin1 = 22;
+const int echoPin1 = 23;
+
+const int trigPin2 = 19;
+const int echoPin2 = 21;
+
+OccupancyCounter counter(trigPin1, echoPin1, trigPin2, echoPin2);
 
 void setup() {
   Serial.begin(115200);
-  pinMode(micPin, INPUT);
+  counter.begin();
 }
 
 void loop() {
-  unsigned long startTime = millis();
-  unsigned int volume = 0;
-  unsigned int signalMax = 0;
-  unsigned int signalMin = 1023;
-  unsigned int currSample;
+  counter.update();
 
-  while (millis() - startTime < sampleMillis) {
-    currSample = analogRead(A0);
-    if (currSample < 1023) {
-      if (currSample > signalMax) {
-        signalMax = currSample;
-      }
-      if (currSample < signalMin) {
-        signalMin = currSample;
-      }
-    }
+  int nextDelay = 1000;
+
+  if (!counter.isTriggered1() && !counter.isTriggered2()) {
+    nextDelay -= 800;
   }
-  
-  volume = signalMax - signalMin;
 
-  Serial.print("Sound Amplitude: ");
-  for (unsigned int i=0;i<volume;i+=2)
-    Serial.print(".");
-  Serial.print(volume);
-  Serial.println();
+  Serial.print("Occupancy: ");
+  Serial.println(counter.getOccupancy());
+
+  delay(nextDelay);
 }
