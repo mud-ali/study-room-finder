@@ -1,8 +1,8 @@
 import os
 import shutil
 
-config_file = "src/config.h"
-example_file = "src/config.example.h"
+config_file = "src/config.hpp"
+example_file = "src/config.example.hpp"
 
 if not os.path.exists(config_file):
     shutil.copy(example_file, config_file)

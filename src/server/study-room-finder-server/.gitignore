@@ -6,3 +6,4 @@
 
 # contains SSID name and password
 src/config.h
+src/config.hpp

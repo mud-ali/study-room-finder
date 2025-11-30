@@ -1,4 +1,4 @@
-#include "room_data.h"
+#include "room_data.hpp"
 
 roomData ckbLounge = {"CKB Study Lounge", 0, 0, 100};
 
