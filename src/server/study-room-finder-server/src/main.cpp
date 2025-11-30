@@ -6,8 +6,8 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
-#include "config.h"
-#include "room_data.h"
+#include "config.hpp"
+#include "room_data.hpp"
 
 #ifndef SSID
 #define SSID ""
@@ -66,24 +66,17 @@ void handleNotFound() {
 
 void setup(void) {
   Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
 
-  int wifiConnected = WiFi.begin(ssid, password);
-  if (wifiConnected == WL_CONNECT_FAILED) {
-    Serial.println("failed to connect wifi");
-  }
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(ssid, password);
+
   Serial.println("");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
+  Serial.print("Access Point started. SSID: ");
   Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.print("AP IP address (fixed): ");
+  Serial.println(WiFi.softAPIP());
 
-  if (MDNS.begin("esp8266")) {
+  if (MDNS.begin("studyroom")) {
     Serial.println("MDNS responder started");
   }
 
