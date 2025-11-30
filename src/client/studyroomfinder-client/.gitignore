@@ -4,3 +4,6 @@
 .vscode/launch.json
 .vscode/ipch
 *.code-workspace
+
+# wifi credentials
+wifi_config.hpp
