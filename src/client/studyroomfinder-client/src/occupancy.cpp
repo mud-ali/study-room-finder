@@ -83,10 +83,13 @@ void OccupancyCounter::update() {
   _lastTriggered1 = triggered1;
   _lastTriggered2 = triggered2;
 
-  if (triggered1 && !triggered2)
-    _occupancy++;
+  if (triggered1 && !triggered2) {
+      _occupancy++;
+      delay(400);
+  }
   else if (!triggered1 && triggered2)
     _occupancy--;
+    delay(400);
 }
 
 int OccupancyCounter::getOccupancy() const { return _occupancy; }
