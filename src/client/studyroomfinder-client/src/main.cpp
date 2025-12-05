@@ -18,6 +18,8 @@ const int echoPin1 = 23;
 const int trigPin2 = 19;
 const int echoPin2 = 21;
 
+int volumeVal = 50;
+
 // static properties for this counter
 string clientName = "CKB Study Lounge";
 
@@ -60,7 +62,7 @@ void postUpdate() {
   // Build JSON payload
   String json = "{\"name\":\"" + String(clientName.c_str()) + 
                 "\",\"occupancy\":" + String(counter.getOccupancy()) + 
-                ",\"volume\":0}";
+                ",\"volume\":"+ String(volumeVal) +"}";
   
   Serial.print("POST: ");
   Serial.println(json);
@@ -87,12 +89,16 @@ void setup() {
 void loop() {
   counter.update();
 
-  // POST every 5 seconds
   unsigned long now = millis();
   if (now - lastPostTime >= POST_INTERVAL_MS) {
     postUpdate();
     lastPostTime = now;
   }
+
+  int sign = random() % 2 == 0 ? -1 : 1;
+  volumeVal += sign;
+  if (volumeVal > 90) volumeVal -= 2;
+  else if (volumeVal < 10) volumeVal += 2;
 
   delay(200);
 }
